@@ -1,70 +1,86 @@
-# Getting Started with Create React App
+# Redux
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+> 상태 전부는 하나의 저장소(store) 안에 있는 객체 트리에 저장되는데, 상태 트리를 변경하는 유일한 방법은 무엇이 일어날지 서술하는 객체인 액션(action)을 보내는 것 뿐이다. 액션이 상태 트리를 어떻게 변경하맂 명시하기 위해선 리듀서(reducers)를 작성해야 한다.
 
-## Available Scripts
+## 설치하기
 
-In the project directory, you can run:
+```
+npm install redux
+```
 
-### `npm start`
+## Action
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+`type`만이 필수 프로퍼티이며, 문자열이다.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- {type: 'TEST'} : payload없는 액션
+- {type: 'TEST', params: 'hello'} : payload있는 액션
 
-### `npm test`
+### Action Creator
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+함수를 통해 액션을 생성해서, 액션 객체를 리턴해준다.
 
-### `npm run build`
+```js
+function 액션생성자() {
+  return action;
+}
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+1. 액션 생성자를 통해 액션을 만들어내며 만들어낸 액션 객체를 디럭스 스토어에 보낸다.
+2. 리덕스 스토어가 액션 객체를 받으면 스토어의 상태 값이 변경된다.
+3. 변경된 상태 갑셍 의해 상태를 이용하고 있는 컴포넌트가 변경된다.
+4. 액션은 스토어에 보내는 일종의 인풋이다.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Reducers
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+액션을 주면, 액션이 적용되어 달라진 결과를 만들어주는 순수함수.
 
-### `npm run eject`
+```js
+function 리듀서(previousState, action) {
+  return newState;
+}
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+액션을 받아서 `State`를 리턴하는 구조로, 인자로 들어오는 `previousState`와 리턴되는 `newState`는 다른 참조를 가지도록 해야한다.(Immutable)
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## createStore
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```js
+const store = createStore(리듀서);
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+//스토어를 만드는 함수
+createStore<S>(
+  reducer: Reducer<S>,
+  preloadedState: S,
+  enhancer?:StoreEnhancer<S>
+):Store<S>
+```
 
-## Learn More
+- `store.getState()` : 현재 상태를 가져온다.
+- `store.dispatch(액션)`, `store.dispatch(액션생성자())` : store의 상태를 변경시킨다.
+- `const unsubscribe = store.subscribe(()=>{})`
+  - 리턴이 unsubscribe이다.
+- `store.replaceReducer(다른 리듀서)`
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## combineReducers
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+여러개의 서브리듀서를 하나로 합쳐준다.
 
-### Code Splitting
+```js
+import { combineReducers } from "redux";
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+const reducer = combineReducers({
+  todos,
+  filter,
+});
 
-### Analyzing the Bundle Size
+//todos : action.type = ADD_TODO, COMPLETE_TODO
+//filter : action.type = SHOW_ALL, SHWO__COMPLETE
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+<!-- 단일 스토어 사용 준비하기
 
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- import redux
+- 액션 정의하기
+- 액션을 사용하는 리듀서 만들기
+- 리듀서를 합치기
+- 리듀서를 인자로 단일 스토어를 만들기 -->
